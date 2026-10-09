@@ -6,7 +6,26 @@ import { useState } from 'react'
 import { ArrowUpRight, ChevronRight, Menu, X, Settings, Wrench, ShieldCheck, Cog } from 'lucide-react'
 import { contact, placeholders, tel, mailto } from '@/lib/contact'
 
-const people = contact.team
+export type ContactPerson = {
+  _id: string
+  nimi: string
+  titteli?: string
+  puhelin?: string
+  email?: string
+  imageUrl?: string
+}
+
+export type Service = {
+  _id: string
+  otsikko: string
+  kuvaus?: string
+  kohdat?: string[]
+}
+
+type SiteData = {
+  people: ContactPerson[]
+  services: Service[]
+}
 
 const content = {
   fi: {
@@ -37,7 +56,7 @@ const content = {
   }
 }
 
-export function Site({ lang }: { lang: 'fi' | 'en' }) {
+export function Site({ lang, people, services }: { lang: 'fi' | 'en' } & SiteData) {
   const t = lang === 'en' ? {
     ...content.en,
     nav: ['Services', 'About', 'Contact'],
@@ -83,10 +102,10 @@ export function Site({ lang }: { lang: 'fi' | 'en' }) {
     {menuOpen && <nav className="mobile-nav" aria-label="Mobile navigation"><a href="#palvelut" onClick={() => setMenuOpen(false)}>{t.nav[0]}</a><a href="#meista" onClick={() => setMenuOpen(false)}>{t.nav[1]}</a><a href="#yhteys" onClick={() => setMenuOpen(false)}>{t.nav[2]}</a><div className="mobile-langs"><Link href="/fi">Suomi</Link><Link href="/en">English</Link></div></nav>}
     <main id="main-content"><section className="hero"><div className="hero-photo" aria-hidden="true"><img src={placeholders.hero} alt="" />{/* TODO swap in own photo */}<div className="hero-photo-overlay" /></div><div className="container hero-content"><p className="eyebrow">{t.heroLabel}</p><h1>{t.heroTitle}</h1><p className="hero-text">{t.heroText}</p><div className="hero-actions"><a className="button" href="#yhteys">{t.quote}<ArrowUpRight aria-hidden="true" /></a><a className="text-link" href="#palvelut">{t.servicesCta}<ChevronRight aria-hidden="true" /></a></div></div></section>
     <section className="proof-strip" aria-label={lang === 'fi' ? 'Luottamustekijät' : 'Trust signals'}><div className="container proof-grid"><div><strong>40+</strong><span>{lang === 'fi' ? 'vuotta kokemusta' : 'years of experience'}</span></div><div><strong>20+</strong><span>{lang === 'fi' ? 'asentajamäärä' : 'installers'}</span></div><div><strong>15+</strong><span>{lang === 'fi' ? 'tyytyväisiä asiakkaita' : 'satisfied customers'}</span></div><div><strong>{lang === 'fi' ? 'Eurooppa' : 'Europe'}</strong><span>{lang === 'fi' ? 'palvelualue' : 'service area'}</span></div></div></section>
-    <section id="palvelut" className="section section-services"><div className="container"><div className="section-intro"><div><p className="eyebrow">{t.servicesEyebrow}</p><h2>{t.servicesTitle}</h2></div><p>{t.servicesText}</p></div><div className="services-grid">{t.services.map(([title, text]) => <a href="#yhteys" className="service-card" key={title}><div><h3>{title}</h3><p>{text}</p></div></a>)}</div></div></section>
+    <section id="palvelut" className="section section-services"><div className="container"><div className="section-intro"><div><p className="eyebrow">{t.servicesEyebrow}</p><h2>{t.servicesTitle}</h2></div><p>{t.servicesText}</p></div><div className="services-grid">{services.map(service => <a href="#yhteys" className="service-card" key={service._id}><div><h3>{service.otsikko}</h3>{service.kuvaus && <p>{service.kuvaus}</p>}</div></a>)}</div></div></section>
     <section id="referenssit" className="section section-projects"><div className="container"><div className="section-intro"><div><p className="eyebrow">{t.projectsEyebrow}</p><h2>{t.projectsTitle}</h2></div><p>{t.projectsText}</p></div><div className="projects-grid">{t.projects.map(([location, title, description, image]) => <a className="project-card" href="#yhteys" key={title}><img src={image} alt={`${title}, ${location}`} loading="lazy" /><div className="project-overlay"><span>{location}</span><h3>{title}</h3><p>{description}</p></div></a>)}</div></div></section>
     <section id="meista" className="section section-principles"><div className="container principles-layout"><div><p className="eyebrow">{t.principlesEyebrow}</p><h2>{t.principlesTitle}</h2><p className="about-text">{t.aboutText}</p><div className="principle-list">{t.principles.map(([title, text]) => <article className="principle" key={title}><div><h3>{title}</h3><p>{text}</p></div></article>)}</div></div></div></section>
-    <section className="section section-team"><div className="container"><div className="section-intro"><div><p className="eyebrow">{t.teamEyebrow}</p><h2>{t.teamTitle}</h2></div><p>{t.teamText}</p></div><div className="people-grid">{people.map(person => <article className="person" key={person.name}><div className="person-image"><NextImage src={person.image} alt={`${person.name}, ${person.role}`} fill sizes="(max-width: 700px) 50vw, 25vw" /></div><p className="person-role">{localizedRole(person.role)}</p><h3>{person.name}</h3><a href={tel(person.phone)}>{person.phone}</a><a href={mailto(person.email)}>{person.email}</a></article>)}</div></div></section>
+    <section className="section section-team"><div className="container"><div className="section-intro"><div><p className="eyebrow">{t.teamEyebrow}</p><h2>{t.teamTitle}</h2></div><p>{t.teamText}</p></div><div className="people-grid">{people.map(person => <article className="person" key={person._id}>{person.imageUrl && <div className="person-image"><NextImage src={person.imageUrl} alt={person.titteli ? `${person.nimi}, ${person.titteli}` : person.nimi} fill sizes="(max-width: 700px) 50vw, 25vw" /></div>}<p className="person-role">{person.titteli}</p><h3>{person.nimi}</h3>{person.puhelin && <a href={tel(person.puhelin)}>{person.puhelin}</a>}{person.email && <a href={mailto(person.email)}>{person.email}</a>}</article>)}</div></div></section>
     <section id="yhteys" className="section section-contact"><div className="container contact-layout"><div className="contact-copy"><p className="eyebrow">{t.contactEyebrow}</p><h2>{t.contactTitle}</h2><p>{t.contactText}</p><div className="contact-details"><a href={mailto(contact.email)}>petri.heijari@pvelectrics.fi</a><a href={tel(contact.phone)}>{contact.phone}</a><span>{t.address}</span></div></div><div className="quote-form-wrap"><p className="form-kicker">{t.formTitle}</p><form className="quote-form" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); const subject = encodeURIComponent(`Tarjouspyyntö: ${data.get('company') || data.get('name')}`); const body = encodeURIComponent(`Nimi: ${data.get('name')}\nYritys: ${data.get('company')}\nSähköposti: ${data.get('email')}\nPuhelin: ${data.get('phone') || '-'}\n\n${data.get('message')}`); window.location.href = `mailto:petri.heijari@pvelectrics.fi?subject=${subject}&body=${body}` }}><div className="form-row"><label>{t.formName}<input required name="name" /></label><label>{t.formCompany}<input name="company" /></label></div><div className="form-row"><label>{t.formEmail}<input required type="email" name="email" /></label><label>{t.formPhone}<input type="tel" name="phone" /></label></div><label>{t.formMessage}<textarea required name="message" rows={4}></textarea></label><label className="consent"><input required type="checkbox" /> <span>{lang === 'fi' ? 'Hyväksyn tietojeni käsittelyn yhteydenottoa varten.' : 'I consent to my information being used to respond to this enquiry.'}</span></label><button className="button" type="submit">{t.formSubmit}<ArrowUpRight aria-hidden="true" /></button></form></div></div></section></main>
     <footer className="site-footer"><div className="container footer-grid"><div><Link href={`/${lang}`} className="brand brand-footer"><img className="brand-logo" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pv_logo_ilmantaustaa-FtdYx3SzVQeExxmqZ5fCBdnqTtWXd1.avif" alt="PV Electrics Oy" /></Link><p>{t.footer}</p></div><div><p className="footer-label">{lang === 'fi' ? 'Navigointi' : 'Navigation'}</p><a href="#palvelut">{t.nav[0]}</a><a href="#meista">{t.nav[1]}</a><a href="#yhteys">{t.nav[2]}</a></div><div><p className="footer-label">{lang === 'fi' ? 'Kieli' : 'Language'}</p><Link href="/fi">Suomi</Link><Link href="/en">English</Link><Link href={`/${lang}/tietosuoja`}>{lang === 'fi' ? 'Tietosuoja' : 'Privacy notice'}</Link></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} PV Electrics Oy</span><span>Y-tunnus 3510419-2</span></div></footer><a className="mobile-quote" href="#yhteys">{t.quote}<ArrowUpRight aria-hidden="true" /></a>
   </div>
