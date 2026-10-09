@@ -1,4 +1,4 @@
-import { groq } from 'next-sanity'
+import groq from 'next-sanity'
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
 import { Site, type ContactPerson, type Service } from './site'
